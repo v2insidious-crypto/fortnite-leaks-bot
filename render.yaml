@@ -1,0 +1,12 @@
+services:
+  - type: worker
+    name: fortnite-leaks-bot
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: DISCORD_WEBHOOK_URL
+        sync: false  # set in Render dashboard -> Environment
+      - key: PYTHONUNBUFFERED
+        value: 1
