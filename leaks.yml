@@ -1,0 +1,33 @@
+name: Fortnite Leaks -> Discord (PC-off)
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # every 5 minutes, runs even when your PC is off (GitHub servers)
+  workflow_dispatch:       # manual run button
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - run: pip install -r requirements.txt
+      - name: Restore seen cache
+        uses: actions/cache@v4
+        with:
+          path: leaks_seen.json
+          key: leaks-seen-${{ hashFiles('leaks_seen.json') }}
+          restore-keys: leaks-seen-
+      - name: Poll leakers once and send new to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python -u discord_leaks_bot.py --once
+      - name: Save seen cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: leaks_seen.json
+          key: leaks-seen-${{ hashFiles('leaks_seen.json') }}-${{ github.run_id }}
